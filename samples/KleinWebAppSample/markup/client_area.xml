@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:t="http://twistedmatrix.com/ns/twisted.web.template/0.1">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Open API Web App Sample</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+  <link rel="stylesheet" href="/css/site.css" />
+
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/site.js"></script>
+</head>
+<body class="container-fluid bg-dark text-white">
+	<div class="row">
+		<div class="col">
+			<div class="row form-group mt-1">
+				<div class="col-11">
+					<input type="text" class="form-control" id="commandInput" placeholder="Command" />
+				</div>
+				<div class="col">
+					<button type="button" class="btn btn-primary" id="sendButton">Send</button>
+				</div>
+			</div>
+			<div class="row form-group mt-1">
+				<div class="col">
+					<textarea class="form-control" type="submit" id="outputTextarea" style="height: 92vh;"></textarea>
+				</div>
+			</div>
+		</div>
+		<div class="col mt-1">
+			<h1 class="text-center">
+				Welcome to cTrader Open API Pyhton Web App Sample
+			</h1>
+			<p>This is a sample web app built based on Twisted Klein framework.</p>
+			<p>You can send Open API commands and receive back the responses from API.</p>
+			<p>Commands (Parameters with an * are required):</p>
+			<ul>
+				<li>
+					ProtoOAVersionReq: Returns the API server version
+				</li>
+				<li>
+					setAccount *accountId: For all subsequent requests this account will be used
+				</li>
+				<li>
+					ProtoOAGetAccountListByAccessTokenReq: Returns the list of authorized accounts for the token
+				</li>
+				<li>
+					ProtoOAAssetListReq: Returns the list of account assets list
+				</li>
+				<li>
+					ProtoOAAssetClassListReq: Returns the list of account asset classes
+				</li>
+				<li>
+					ProtoOASymbolCategoryListReq: Returns the list of account symbol categories
+				</li>
+				<li>
+					ProtoOASymbolsListReq: Returns the list of account symbols
+				</li>
+				<li>
+					ProtoOATraderReq: Returns the token trader profile
+				</li>
+				<li>
+					ProtoOAReconcileReq: Returns the account open positions/orders
+				</li>
+				<li>
+					ProtoOAGetTrendbarsReq *weeks *period *symbolId: Returns the trend bar data of a symbol
+				</li>
+				<li>
+					ProtoOAGetTickDataReq *days *type *symbolId: Returns the tick data of a symbol
+				</li>
+				<li>
+					NewMarketOrder *symbolId *tradeSide *volume: Creates a new market order
+				</li>
+				<li>
+					NewLimitOrder *symbolId *tradeSide *volume *price: Creates a new limit order
+				</li>
+				<li>
+					NewStopOrder *symbolId *tradeSide *volume *price: Creates a new stop order
+				</li>
+				<li>
+					ClosePosition *positionId *volume: Closes a position x amount of volume
+				</li>
+				<li>
+					CancelOrder *orderId: Cancels a pending order
+				</li>
+			</ul>
+		</div>
+	</div>
+</body>
+</html>
