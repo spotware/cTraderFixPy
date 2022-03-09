@@ -3,18 +3,15 @@
 import datetime
 
 class ResponseMessage:
-    def __init__(self, message, delimiter = ""):
+    def __init__(self, message, delimiter):
         self._message = message.replace(delimiter, "|")
-        self._fields = {int(field.split("=")[0]):field.split("=")[1] for field in message.split(delimiter) if field != ""}
+        self._fields = [(int(field.split("=")[0]), field.split("=")[1]) for field in message.split(delimiter) if field != "" and "=" in field]
 
-    def getFieldStr(self, fieldNumber):
-        return self._fields[fieldNumber]
-
-    def getFieldInt(self, fieldNumber):
-        return int(self._fields[fieldNumber])
-
-    def getFieldFloat(self, fieldNumber):
-        return float(self._fields[fieldNumber])
+    def getFieldValue(self, fieldNumber):
+        for field in self._fields:
+            if field[0] == fieldNumber:
+                return field[1]
+        return None
 
     def getMessageType(self):
         return self._fields[35]
@@ -23,21 +20,20 @@ class ResponseMessage:
         return self._message
 
 class RequestMessage:
-    def __init__(self, messageType, sessionInfo, delimiter = ""):
+    def __init__(self, messageType, sessionInfo):
         self._type = messageType
         self._sessionInfo = sessionInfo
-        self._delimiter = delimiter
 
     def getMessage(self, sequenceNumber):
         body = self._getBody()
         if body is not None:
             header = self._getHeader(len(body), sequenceNumber)
-            headerAndBody = f"{header}{self._delimiter}{body}{self._delimiter}"
+            headerAndBody = f"{header}{self.delimiter}{body}{self.delimiter}"
         else:
             header = self._getHeader(0, sequenceNumber)
-            headerAndBody = "{header}{self._delimiter}"
+            headerAndBody = "{header}{self.delimiter}"
         trailer = self._getTrailer(headerAndBody)
-        return f"{headerAndBody}{trailer}{self._delimiter}"
+        return f"{headerAndBody}{trailer}{self.delimiter}"
 
     def _getBody(self):
         return None
@@ -51,8 +47,8 @@ class RequestMessage:
         fields.append(f"50={self._sessionInfo['SenderSubID']}")
         fields.append(f"34={sequenceNumber}")
         fields.append(f"52={datetime.datetime.utcnow().strftime('%Y%m%d-%H:%M:%S')}")
-        fieldsJoined = self._delimiter.join(fields)
-        return f"8={self._sessionInfo['BeginString']}{self._delimiter}9={lenBody+len(fieldsJoined) + 2}{self._delimiter}{fieldsJoined}"
+        fieldsJoined = self.delimiter.join(fields)
+        return f"8={self._sessionInfo['BeginString']}{self.delimiter}9={lenBody+len(fieldsJoined) + 2}{self.delimiter}{fieldsJoined}"
 
     def _getTrailer(self, headerAndBody):
         messageBytes = bytes(headerAndBody, "ascii")
@@ -63,8 +59,8 @@ class RequestMessage:
         return f"10={str(checksum).zfill(3)}"
 
 class LogonRequest(RequestMessage):
-    def __init__(self, sessionInfo, delimiter = ""):
-        super().__init__("A", sessionInfo, delimiter)
+    def __init__(self, sessionInfo):
+        super().__init__("A", sessionInfo)
         self.EncryptionScheme = 0
 
     def _getBody(self):
@@ -75,12 +71,12 @@ class LogonRequest(RequestMessage):
             fields.append(f"141=Y")
         fields.append(f"553={self._sessionInfo['Username']}")
         fields.append(f"554={self._sessionInfo['Password']}")
-        return f"{self._delimiter.join(fields)}"
+        return f"{self.delimiter.join(fields)}"
 
 
 class Heartbeat(RequestMessage):
-    def __init__(self, sessionInfo, delimiter = ""):
-        super().__init__("0", sessionInfo, delimiter)
+    def __init__(self, sessionInfo):
+        super().__init__("0", sessionInfo)
 
     def _getBody(self):
         if hasattr(self, "TestReqId") is False:
@@ -88,40 +84,40 @@ class Heartbeat(RequestMessage):
         return f"112={self.TestReqId}"
 
 class TestRequest(RequestMessage):
-    def __init__(self, sessionInfo, delimiter = ""):
-        super().__init__("1", sessionInfo, delimiter)
+    def __init__(self, sessionInfo):
+        super().__init__("1", sessionInfo)
 
     def _getBody(self):
         return f"112={self.TestReqId}"
 
 class LogoutRequest(RequestMessage):
-    def __init__(self, sessionInfo, delimiter = ""):
-        super().__init__("5", sessionInfo, delimiter)
+    def __init__(self, sessionInfo):
+        super().__init__("5", sessionInfo)
 
 class ResendRequest(RequestMessage):
-    def __init__(self, sessionInfo, delimiter = ""):
-        super().__init__("2", sessionInfo, delimiter)
+    def __init__(self, sessionInfo):
+        super().__init__("2", sessionInfo)
 
     def _getBody(self):
         fields = []
         fields.append(f"7={self.BeginSeqNo}")
         fields.append(f"16={self.EndSeqNo}")
-        return f"{self._delimiter.join(fields)}"
+        return f"{self.delimiter.join(fields)}"
 
 class SequenceReset(RequestMessage):
-    def __init__(self, sessionInfo, delimiter = ""):
-        super().__init__("4", sessionInfo, delimiter)
+    def __init__(self, sessionInfo):
+        super().__init__("4", sessionInfo)
 
     def _getBody(self):
         fields = []
         if hasattr(self, "GapFillFlag"):
             fields.append(f"123={self.GapFillFlag}")
         fields.append(f"36={self.NewSeqNo}")
-        return f"{self._delimiter.join(fields)}"
+        return f"{self.delimiter.join(fields)}"
 
 class MarketDataRequest(RequestMessage):
-    def __init__(self, sessionInfo, delimiter = ""):
-        super().__init__("V", sessionInfo, delimiter)
+    def __init__(self, sessionInfo):
+        super().__init__("V", sessionInfo)
 
     def _getBody(self):
         fields = []
@@ -134,11 +130,11 @@ class MarketDataRequest(RequestMessage):
         fields.append(f"269={self.MDEntryType}")
         fields.append(f"146={self.NoRelatedSym}")
         fields.append(f"55={self.Symbol}")
-        return f"{self._delimiter.join(fields)}"
+        return f"{self.delimiter.join(fields)}"
 
 class NewOrderSingle(RequestMessage):
-    def __init__(self, sessionInfo, delimiter = ""):
-        super().__init__("D", sessionInfo, delimiter)
+    def __init__(self, sessionInfo):
+        super().__init__("D", sessionInfo)
 
     def _getBody(self):
         fields = []
@@ -158,16 +154,81 @@ class NewOrderSingle(RequestMessage):
             fields.append(f"721={self.PosMaintRptID}")
         if hasattr(self, "Designation"):
             fields.append(f"494={self.Designation}")
-        return f"{self._delimiter.join(fields)}"
+        return f"{self.delimiter.join(fields)}"
 
 class OrderStatusRequest(RequestMessage):
-    def __init__(self, sessionInfo, delimiter = ""):
-        super().__init__("H", sessionInfo, delimiter)
+    def __init__(self, sessionInfo):
+        super().__init__("H", sessionInfo)
 
     def _getBody(self):
         fields = []
         fields.append(f"11={self.ClOrdID}")
         if hasattr(self, "Side"):
             fields.append(f"54={self.Side}")
-        return f"{self._delimiter.join(fields)}"
+        return f"{self.delimiter.join(fields)}"
 
+class OrderMassStatusRequest(RequestMessage):
+    def __init__(self, sessionInfo):
+        super().__init__("AF", sessionInfo)
+
+    def _getBody(self):
+        fields = []
+        fields.append(f"584={self.MassStatusReqID}")
+        fields.append(f"585={self.MassStatusReqType}")
+        if hasattr(self, "IssueDate"):
+            fields.append(f"225={self.IssueDate.strftime('%Y%m%d-%H:%M:%S')}")
+        return f"{self.delimiter.join(fields)}"
+
+class RequestForPositions(RequestMessage):
+    def __init__(self, sessionInfo):
+        super().__init__("AN", sessionInfo)
+
+    def _getBody(self):
+        fields = []
+        fields.append(f"710={self.PosReqID}")
+        if hasattr(self, "PosMaintRptID"):
+            fields.append(f"721={self.PosMaintRptID}")
+        return f"{self.delimiter.join(fields)}"
+
+class OrderCancelRequest(RequestMessage):
+    def __init__(self, sessionInfo):
+        super().__init__("F", sessionInfo)
+
+    def _getBody(self):
+        fields = []
+        fields.append(f"41={self.OrigClOrdID}")
+        if hasattr(self, "OrderID"):
+            fields.append(f"37={self.OrderID}")
+        fields.append(f"11={self.ClOrdID}")
+        return f"{self.delimiter.join(fields)}"
+
+class OrderCancelReplaceRequest(RequestMessage):
+    def __init__(self, sessionInfo):
+        super().__init__("G", sessionInfo)
+
+    def _getBody(self):
+        fields = []
+        fields.append(f"41={self.OrigClOrdID}")
+        if hasattr(self, "OrderID"):
+            fields.append(f"37={self.OrderID}")
+        fields.append(f"11={self.ClOrdID}")
+        fields.append(f"38={self.OrderQty}")
+        if hasattr(self, "Price"):
+            fields.append(f"44={self.Price}")
+        if hasattr(self, "StopPx"):
+            fields.append(f"99={self.StopPx}")
+        if hasattr(self, "ExpireTime"):
+            fields.append(f"126={self.ExpireTime.strftime('%Y%m%d-%H:%M:%S')}")
+        return f"{self.delimiter.join(fields)}"
+
+class SecurityListRequest(RequestMessage):
+    def __init__(self, sessionInfo):
+        super().__init__("x", sessionInfo)
+
+    def _getBody(self):
+        fields = []
+        fields.append(f"320={self.SecurityReqID}")
+        fields.append(f"559={self.SecurityListRequestType}")
+        if hasattr(self, "Symbol"):
+            fields.append(f"55={self.Symbol}")
+        return f"{self.delimiter.join(fields)}"

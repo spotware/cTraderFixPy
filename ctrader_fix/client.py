@@ -7,12 +7,12 @@ from factory import Factory
 from twisted.internet import reactor
 from fixProtocol import FixProtocol
 from twisted.internet import reactor
-import datetime
 
 class Client(ClientService):
-    def __init__(self, host, port, ssl=False, retryPolicy=None, clock=None, prepareConnection=None, numberOfMessagesToSendPerSecond=5):
+    def __init__(self, host, port, ssl=False, delimiter = "", retryPolicy=None, clock=None, prepareConnection=None, numberOfMessagesToSendPerSecond=5):
         self._runningReactor = reactor
         self.numberOfMessagesToSendPerSecond = numberOfMessagesToSendPerSecond
+        self.delimiter = delimiter
         endpoint = clientFromString(self._runningReactor, f"ssl:{host}:{port}" if ssl else f"tcp:{host}:{port}")
         factory = Factory.forProtocol(FixProtocol, client=self)
         super().__init__(endpoint, factory, retryPolicy=retryPolicy, clock=clock, prepareConnection=prepareConnection)
@@ -45,9 +45,16 @@ class Client(ClientService):
             self._messageReceivedCallback(self, responseMessage)
 
     def send(self, requestMessage):
+        requestMessage.delimiter = self.delimiter
         diferred = self.whenConnected(failAfterFailures=1)
         diferred.addCallback(lambda protocol: protocol.send(requestMessage))
         return diferred
+
+    def changeMessageSequenceNumber(self, newMessageSequenceNumber):
+        self.factory.messageSequenceNumber = newMessageSequenceNumber
+
+    def getMessageSequenceNumber(self):
+        return self.factory.messageSequenceNumber
 
     def setConnectedCallback(self, callback):
         self._connectedCallback = callback
@@ -75,8 +82,9 @@ if __name__ == "__main__":
         if isMessageSent is True:
             return
         isMessageSent = True
-        request = OrderStatusRequest(tradeSessionInfo)
-        request.ClOrdID = "A"
+        request = SecurityListRequest(tradeSessionInfo)
+        request.SecurityReqID = "A"
+        request.SecurityListRequestType = 0
         client.send(request)
 
     client.setConnectedCallback(onConnected)
