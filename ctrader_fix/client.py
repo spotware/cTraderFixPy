@@ -2,20 +2,20 @@
 
 from twisted.internet.endpoints import clientFromString
 from twisted.application.internet import ClientService
-from messages import *
-from factory import Factory
 from twisted.internet import reactor
-from fixProtocol import FixProtocol
 from twisted.internet import reactor
-import datetime
+from ctrader_fix.messages import *
+from ctrader_fix.factory import Factory
+from ctrader_fix.fixProtocol import FixProtocol
 
 class Client(ClientService):
-    def __init__(self, host, port, ssl=False, retryPolicy=None, clock=None, prepareConnection=None, numberOfMessagesToSendPerSecond=5):
+    def __init__(self, host, port, ssl=False, delimiter = "", retryPolicy=None, clock=None, prepareConnection=None, numberOfMessagesToSendPerSecond=5):
         self._runningReactor = reactor
         self.numberOfMessagesToSendPerSecond = numberOfMessagesToSendPerSecond
+        self.delimiter = delimiter
         endpoint = clientFromString(self._runningReactor, f"ssl:{host}:{port}" if ssl else f"tcp:{host}:{port}")
-        factory = Factory.forProtocol(FixProtocol, client=self)
-        super().__init__(endpoint, factory, retryPolicy=retryPolicy, clock=clock, prepareConnection=prepareConnection)
+        self._factory = Factory.forProtocol(FixProtocol, client=self)
+        super().__init__(endpoint, self._factory, retryPolicy=retryPolicy, clock=clock, prepareConnection=prepareConnection)
         self._events = dict()
         self._responseDeferreds = dict()
         self.isConnected = False
@@ -45,9 +45,16 @@ class Client(ClientService):
             self._messageReceivedCallback(self, responseMessage)
 
     def send(self, requestMessage):
+        requestMessage.delimiter = self.delimiter
         diferred = self.whenConnected(failAfterFailures=1)
         diferred.addCallback(lambda protocol: protocol.send(requestMessage))
         return diferred
+
+    def changeMessageSequenceNumber(self, newMessageSequenceNumber):
+        self._factory.messageSequenceNumber = newMessageSequenceNumber
+
+    def getMessageSequenceNumber(self):
+        return self._factory.messageSequenceNumber
 
     def setConnectedCallback(self, callback):
         self._connectedCallback = callback
@@ -57,30 +64,3 @@ class Client(ClientService):
 
     def setMessageReceivedCallback(self, callback):
         self._messageReceivedCallback = callback
-
-
-if __name__ == "__main__":
-    client = Client("h51.p.ctrader.com", 5202)
-    quoteSessionInfo = {"Username": 3279203, "Password": 3279203, "BeginString": "FIX.4.4", "SenderCompID": "demo.icmarkets.3279203", "SenderSubID": "QUOTE", "TargetCompID": "cServer", "TargetSubID": "QUOTE", "HeartBeat": 30}
-    tradeSessionInfo = {"Username": 3279203, "Password": 3279203, "BeginString": "FIX.4.4", "SenderCompID": "demo.icmarkets.3279203", "SenderSubID": "TRADE", "TargetCompID": "cServer", "TargetSubID": "TRADE", "HeartBeat": 30}
-    isMessageSent = False
-
-    def onConnected(client):
-        logonMessage = LogonRequest(tradeSessionInfo)
-        client.send(logonMessage)
-
-    def onMessageReceived(client, responseMessage):
-        print("Received: ", responseMessage.getMessage())
-        global isMessageSent
-        if isMessageSent is True:
-            return
-        isMessageSent = True
-        request = OrderStatusRequest(tradeSessionInfo)
-        request.ClOrdID = "A"
-        client.send(request)
-
-    client.setConnectedCallback(onConnected)
-    client.setMessageReceivedCallback(onMessageReceived)
-    client.startService()
-
-    reactor.run()

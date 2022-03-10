@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
 from twisted.internet.protocol import Protocol
-from messages import ResponseMessage
+from ctrader_fix.messages import ResponseMessage
 
 class FixProtocol(Protocol):
-    _messageSequenceNumber = 0
+    _currentMessage = ''
     def connectionMade(self):
+        self.factory.messageSequenceNumber = 0
         super().connectionMade()
         self.factory.connected()
 
@@ -14,11 +15,14 @@ class FixProtocol(Protocol):
         self.factory.disconnected(reason)
 
     def dataReceived(self, data):
-        responseMessage = ResponseMessage(data.decode("ascii"))
-        self.factory.received(responseMessage)
+        dataString = data.decode("ascii")
+        self._currentMessage += dataString
+        if f"{self.factory.delimiter}10=" in dataString and dataString.endswith(self.factory.delimiter):         
+            responseMessage = ResponseMessage(self._currentMessage, self.factory.delimiter)
+            self._currentMessage = ''
+            self.factory.received(responseMessage)
 
     def send(self, requestMessage):
-        self._messageSequenceNumber += 1
-        messageString = requestMessage.getMessage(self._messageSequenceNumber)
-        print("Sending: ", messageString)
+        self.factory.messageSequenceNumber += 1
+        messageString = requestMessage.getMessage(self.factory.messageSequenceNumber)
         return self.transport.write(messageString.encode("ascii"))
