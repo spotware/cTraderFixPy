@@ -64,31 +64,3 @@ class Client(ClientService):
 
     def setMessageReceivedCallback(self, callback):
         self._messageReceivedCallback = callback
-
-
-if __name__ == "__main__":
-    client = Client("h51.p.ctrader.com", 5202)
-    quoteSessionInfo = {"Username": 3279203, "Password": 3279203, "BeginString": "FIX.4.4", "SenderCompID": "demo.icmarkets.3279203", "SenderSubID": "QUOTE", "TargetCompID": "cServer", "TargetSubID": "QUOTE", "HeartBeat": 30}
-    tradeSessionInfo = {"Username": 3279203, "Password": 3279203, "BeginString": "FIX.4.4", "SenderCompID": "demo.icmarkets.3279203", "SenderSubID": "TRADE", "TargetCompID": "cServer", "TargetSubID": "TRADE", "HeartBeat": 30}
-    isMessageSent = False
-
-    def onConnected(client):
-        logonMessage = LogonRequest(tradeSessionInfo)
-        client.send(logonMessage)
-
-    def onMessageReceived(client, responseMessage):
-        print("Received: ", responseMessage.getMessage())
-        global isMessageSent
-        if isMessageSent is True:
-            return
-        isMessageSent = True
-        request = SecurityListRequest(tradeSessionInfo)
-        request.SecurityReqID = "A"
-        request.SecurityListRequestType = 0
-        client.send(request)
-
-    client.setConnectedCallback(onConnected)
-    client.setMessageReceivedCallback(onMessageReceived)
-    client.startService()
-
-    reactor.run()

@@ -6,8 +6,7 @@ from inputimeout import inputimeout, TimeoutOccurred
 import webbrowser
 import datetime
 import json
-from client import Client
-from messages import *
+from ctrader_fix import *
 
 # you can have two separate config files for QUOTE and TRADE
 with open("config-trade.json") as configFile:
