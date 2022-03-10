@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from twisted.internet.protocol import Protocol
-from messages import ResponseMessage
+from ctrader_fix.messages import ResponseMessage
 
 class FixProtocol(Protocol):
     _currentMessage = ''

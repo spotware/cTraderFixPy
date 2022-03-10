@@ -1,6 +1,6 @@
 # Console Sample
 
-This is the console sample for Spotware OpenApiPy Python package.
+This is the console sample for cTrader FIX API Python package.
 
 It uses a single thread which is the Python main execution thread for both getting user inputs and sending/receiving messages to/from API.
 

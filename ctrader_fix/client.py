@@ -2,11 +2,11 @@
 
 from twisted.internet.endpoints import clientFromString
 from twisted.application.internet import ClientService
-from messages import *
-from factory import Factory
 from twisted.internet import reactor
-from fixProtocol import FixProtocol
 from twisted.internet import reactor
+from ctrader_fix.messages import *
+from ctrader_fix.factory import Factory
+from ctrader_fix.fixProtocol import FixProtocol
 
 class Client(ClientService):
     def __init__(self, host, port, ssl=False, delimiter = "", retryPolicy=None, clock=None, prepareConnection=None, numberOfMessagesToSendPerSecond=5):

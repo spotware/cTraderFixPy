@@ -6,10 +6,6 @@ from inputimeout import inputimeout, TimeoutOccurred
 import webbrowser
 import datetime
 import json
-import sys
-
-sys.path.append("../../ctrader_fix")
-
 from client import Client
 from messages import *
 
