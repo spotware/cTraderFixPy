@@ -1,0 +1,13 @@
+{
+  "Host": "",
+  "Port": 0,
+  "SSL": false,
+  "Username": "",
+  "Password": "",
+  "BeginString": "FIX.4.4",
+  "SenderCompID": "",
+  "SenderSubID": "QUOTE",
+  "TargetCompID": "cServer",
+  "TargetSubID": "QUOTE",
+  "HeartBeat": "30"
+}

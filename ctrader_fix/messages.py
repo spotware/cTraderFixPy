@@ -26,9 +26,9 @@ class ResponseMessage:
         return self._message
 
 class RequestMessage:
-    def __init__(self, messageType, sessionInfo):
+    def __init__(self, messageType, config):
         self._type = messageType
-        self._sessionInfo = sessionInfo
+        self._config = config
 
     def getMessage(self, sequenceNumber):
         body = self._getBody()
@@ -37,7 +37,7 @@ class RequestMessage:
             headerAndBody = f"{header}{self.delimiter}{body}{self.delimiter}"
         else:
             header = self._getHeader(0, sequenceNumber)
-            headerAndBody = "{header}{self.delimiter}"
+            headerAndBody = f"{header}{self.delimiter}"
         trailer = self._getTrailer(headerAndBody)
         return f"{headerAndBody}{trailer}{self.delimiter}"
 
@@ -47,14 +47,14 @@ class RequestMessage:
     def _getHeader(self, lenBody, sequenceNumber):
         fields = []
         fields.append(f"35={self._type}")
-        fields.append(f"49={self._sessionInfo['SenderCompID']}")
-        fields.append(f"56={self._sessionInfo['TargetCompID']}")
-        fields.append(f"57={self._sessionInfo['TargetSubID']}")
-        fields.append(f"50={self._sessionInfo['SenderSubID']}")
+        fields.append(f"49={self._config['SenderCompID']}")
+        fields.append(f"56={self._config['TargetCompID']}")
+        fields.append(f"57={self._config['TargetSubID']}")
+        fields.append(f"50={self._config['SenderSubID']}")
         fields.append(f"34={sequenceNumber}")
         fields.append(f"52={datetime.datetime.utcnow().strftime('%Y%m%d-%H:%M:%S')}")
         fieldsJoined = self.delimiter.join(fields)
-        return f"8={self._sessionInfo['BeginString']}{self.delimiter}9={lenBody+len(fieldsJoined) + 2}{self.delimiter}{fieldsJoined}"
+        return f"8={self._config['BeginString']}{self.delimiter}9={lenBody+len(fieldsJoined) + 2}{self.delimiter}{fieldsJoined}"
 
     def _getTrailer(self, headerAndBody):
         messageBytes = bytes(headerAndBody, "ascii")
@@ -65,24 +65,24 @@ class RequestMessage:
         return f"10={str(checksum).zfill(3)}"
 
 class LogonRequest(RequestMessage):
-    def __init__(self, sessionInfo):
-        super().__init__("A", sessionInfo)
+    def __init__(self, config):
+        super().__init__("A", config)
         self.EncryptionScheme = 0
 
     def _getBody(self):
         fields = []
         fields.append(f"98={self.EncryptionScheme}")
-        fields.append(f"108={self._sessionInfo['HeartBeat']}")
+        fields.append(f"108={self._config['HeartBeat']}")
         if hasattr(self, "ResetSeqNum") and self.ResetSeqNum:
             fields.append(f"141=Y")
-        fields.append(f"553={self._sessionInfo['Username']}")
-        fields.append(f"554={self._sessionInfo['Password']}")
+        fields.append(f"553={self._config['Username']}")
+        fields.append(f"554={self._config['Password']}")
         return f"{self.delimiter.join(fields)}"
 
 
 class Heartbeat(RequestMessage):
-    def __init__(self, sessionInfo):
-        super().__init__("0", sessionInfo)
+    def __init__(self, config):
+        super().__init__("0", config)
 
     def _getBody(self):
         if hasattr(self, "TestReqId") is False:
@@ -90,19 +90,19 @@ class Heartbeat(RequestMessage):
         return f"112={self.TestReqId}"
 
 class TestRequest(RequestMessage):
-    def __init__(self, sessionInfo):
-        super().__init__("1", sessionInfo)
+    def __init__(self, config):
+        super().__init__("1", config)
 
     def _getBody(self):
         return f"112={self.TestReqId}"
 
 class LogoutRequest(RequestMessage):
-    def __init__(self, sessionInfo):
-        super().__init__("5", sessionInfo)
+    def __init__(self, config):
+        super().__init__("5", config)
 
 class ResendRequest(RequestMessage):
-    def __init__(self, sessionInfo):
-        super().__init__("2", sessionInfo)
+    def __init__(self, config):
+        super().__init__("2", config)
 
     def _getBody(self):
         fields = []
@@ -111,8 +111,8 @@ class ResendRequest(RequestMessage):
         return f"{self.delimiter.join(fields)}"
 
 class SequenceReset(RequestMessage):
-    def __init__(self, sessionInfo):
-        super().__init__("4", sessionInfo)
+    def __init__(self, config):
+        super().__init__("4", config)
 
     def _getBody(self):
         fields = []
@@ -122,8 +122,8 @@ class SequenceReset(RequestMessage):
         return f"{self.delimiter.join(fields)}"
 
 class MarketDataRequest(RequestMessage):
-    def __init__(self, sessionInfo):
-        super().__init__("V", sessionInfo)
+    def __init__(self, config):
+        super().__init__("V", config)
 
     def _getBody(self):
         fields = []
@@ -139,15 +139,18 @@ class MarketDataRequest(RequestMessage):
         return f"{self.delimiter.join(fields)}"
 
 class NewOrderSingle(RequestMessage):
-    def __init__(self, sessionInfo):
-        super().__init__("D", sessionInfo)
+    def __init__(self, config):
+        super().__init__("D", config)
 
     def _getBody(self):
         fields = []
         fields.append(f"11={self.ClOrdID}")
         fields.append(f"55={self.Symbol}")
         fields.append(f"54={self.Side}")
-        fields.append(f"60={self.TransactTime.strftime('%Y%m%d-%H:%M:%S')}")
+        if hasattr(self, "TransactTime"):
+            fields.append(f"60={self.TransactTime.strftime('%Y%m%d-%H:%M:%S')}")
+        else:
+            fields.append(f"60={datetime.datetime.utcnow().strftime('%Y%m%d-%H:%M:%S')}")
         fields.append(f"38={self.OrderQty}")
         fields.append(f"40={self.OrdType}")
         if hasattr(self, "Price"):
@@ -155,7 +158,7 @@ class NewOrderSingle(RequestMessage):
         if hasattr(self, "StopPx"):
             fields.append(f"99={self.StopPx}")
         if hasattr(self, "ExpireTime"):
-            fields.append(f"126={self.ExpireTime.strftime('%Y%m%d-%H:%M:%S')}")
+            fields.append(f"126={self.ExpireTime.strftime('%Y%m%d-%H:%M:%S')}" if isinstance(self.ExpireTime, datetime.datetime) else f"126={self.ExpireTime}")
         if hasattr(self, "PosMaintRptID"):
             fields.append(f"721={self.PosMaintRptID}")
         if hasattr(self, "Designation"):
@@ -163,8 +166,8 @@ class NewOrderSingle(RequestMessage):
         return f"{self.delimiter.join(fields)}"
 
 class OrderStatusRequest(RequestMessage):
-    def __init__(self, sessionInfo):
-        super().__init__("H", sessionInfo)
+    def __init__(self, config):
+        super().__init__("H", config)
 
     def _getBody(self):
         fields = []
@@ -174,8 +177,8 @@ class OrderStatusRequest(RequestMessage):
         return f"{self.delimiter.join(fields)}"
 
 class OrderMassStatusRequest(RequestMessage):
-    def __init__(self, sessionInfo):
-        super().__init__("AF", sessionInfo)
+    def __init__(self, config):
+        super().__init__("AF", config)
 
     def _getBody(self):
         fields = []
@@ -186,8 +189,8 @@ class OrderMassStatusRequest(RequestMessage):
         return f"{self.delimiter.join(fields)}"
 
 class RequestForPositions(RequestMessage):
-    def __init__(self, sessionInfo):
-        super().__init__("AN", sessionInfo)
+    def __init__(self, config):
+        super().__init__("AN", config)
 
     def _getBody(self):
         fields = []
@@ -197,8 +200,8 @@ class RequestForPositions(RequestMessage):
         return f"{self.delimiter.join(fields)}"
 
 class OrderCancelRequest(RequestMessage):
-    def __init__(self, sessionInfo):
-        super().__init__("F", sessionInfo)
+    def __init__(self, config):
+        super().__init__("F", config)
 
     def _getBody(self):
         fields = []
@@ -209,8 +212,8 @@ class OrderCancelRequest(RequestMessage):
         return f"{self.delimiter.join(fields)}"
 
 class OrderCancelReplaceRequest(RequestMessage):
-    def __init__(self, sessionInfo):
-        super().__init__("G", sessionInfo)
+    def __init__(self, config):
+        super().__init__("G", config)
 
     def _getBody(self):
         fields = []
@@ -228,8 +231,8 @@ class OrderCancelReplaceRequest(RequestMessage):
         return f"{self.delimiter.join(fields)}"
 
 class SecurityListRequest(RequestMessage):
-    def __init__(self, sessionInfo):
-        super().__init__("x", sessionInfo)
+    def __init__(self, config):
+        super().__init__("x", config)
 
     def _getBody(self):
         fields = []

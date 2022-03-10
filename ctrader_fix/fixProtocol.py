@@ -6,6 +6,7 @@ from messages import ResponseMessage
 class FixProtocol(Protocol):
     _currentMessage = ''
     def connectionMade(self):
+        self.factory.messageSequenceNumber = 0
         super().connectionMade()
         self.factory.connected()
 
@@ -24,5 +25,4 @@ class FixProtocol(Protocol):
     def send(self, requestMessage):
         self.factory.messageSequenceNumber += 1
         messageString = requestMessage.getMessage(self.factory.messageSequenceNumber)
-        print("Sending: ", messageString)
         return self.transport.write(messageString.encode("ascii"))

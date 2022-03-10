@@ -14,8 +14,8 @@ class Client(ClientService):
         self.numberOfMessagesToSendPerSecond = numberOfMessagesToSendPerSecond
         self.delimiter = delimiter
         endpoint = clientFromString(self._runningReactor, f"ssl:{host}:{port}" if ssl else f"tcp:{host}:{port}")
-        factory = Factory.forProtocol(FixProtocol, client=self)
-        super().__init__(endpoint, factory, retryPolicy=retryPolicy, clock=clock, prepareConnection=prepareConnection)
+        self._factory = Factory.forProtocol(FixProtocol, client=self)
+        super().__init__(endpoint, self._factory, retryPolicy=retryPolicy, clock=clock, prepareConnection=prepareConnection)
         self._events = dict()
         self._responseDeferreds = dict()
         self.isConnected = False
@@ -51,10 +51,10 @@ class Client(ClientService):
         return diferred
 
     def changeMessageSequenceNumber(self, newMessageSequenceNumber):
-        self.factory.messageSequenceNumber = newMessageSequenceNumber
+        self._factory.messageSequenceNumber = newMessageSequenceNumber
 
     def getMessageSequenceNumber(self):
-        return self.factory.messageSequenceNumber
+        return self._factory.messageSequenceNumber
 
     def setConnectedCallback(self, callback):
         self._connectedCallback = callback
