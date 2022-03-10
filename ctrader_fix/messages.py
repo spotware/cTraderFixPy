@@ -8,10 +8,16 @@ class ResponseMessage:
         self._fields = [(int(field.split("=")[0]), field.split("=")[1]) for field in message.split(delimiter) if field != "" and "=" in field]
 
     def getFieldValue(self, fieldNumber):
+        result = []
         for field in self._fields:
             if field[0] == fieldNumber:
-                return field[1]
-        return None
+                result.append(field[1])
+        lenResult = len(result)
+        if lenResult == 0:
+            return None
+        elif lenResult == 1:
+            return result[0]
+        return result
 
     def getMessageType(self):
         return self._fields[35]
