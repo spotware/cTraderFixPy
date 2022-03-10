@@ -1,14 +1,11 @@
 #!/usr/bin/env python
 
-import requests
 from twisted.internet import reactor
 from inputimeout import inputimeout, TimeoutOccurred
-import webbrowser
-import datetime
 import json
 from ctrader_fix import *
 
-# you can have two separate config files for QUOTE and TRADE
+# you can use two separate config files for QUOTE and TRADE
 with open("config-trade.json") as configFile:
     config = json.load(configFile)
 
@@ -60,11 +57,6 @@ def setParameters(request, **kwargs):
 def send(request):
     diferred = client.send(request)
     diferred.addCallback(lambda _: print("\nSent: ", request.getMessage(client.getMessageSequenceNumber()).replace("", "|")))
-
-def logonRequest(**kwargs):
-    request = LogonRequest(config)
-    setParameters(request, **kwargs)
-    send(request)
 
 commands = {
     "LogonRequest": LogonRequest,
