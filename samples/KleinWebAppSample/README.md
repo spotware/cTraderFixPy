@@ -6,9 +6,27 @@ It's based on Twisted [Klein](https://github.com/twisted/klein) web framework.
 
 You can send and receive API commands by using this sample, it's very similar to Console sample.
 
-To use the sample you have to create a copy of "credentials.json" file and rename it to "credentials-dev.json".
+Before running the sample you have to create a config file and fill it with your trading account FIX API credentials.
 
-Then fill the file with your Open API application credentials.
+Then replace the config file name on sample main file to your config file name.
+
+Config file sample:
+
+```json
+{
+  "Host": "",
+  "Port": 0,
+  "SSL": false,
+  "Username": "",
+  "Password": "",
+  "BeginString": "FIX.4.4",
+  "SenderCompID": "",
+  "SenderSubID": "QUOTE",
+  "TargetCompID": "cServer",
+  "TargetSubID": "QUOTE",
+  "HeartBeat": "30"
+}
+```
 
 After that install Klein with pip:
 ```

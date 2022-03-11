@@ -24,7 +24,7 @@ def showHelp():
     print("* TestRequest: *TestReqId")
     print("* ResendRequest: *BeginSeqNo *EndSeqNo")
     print("* SequenceReset: *NewSeqNo GapFillFlag")
-    print("* SecurityListRequest: *SecurityReqID *SecurityListRequestType Symbol ")
+    print("* SecurityListRequest: *SecurityReqID *SecurityListRequestType Symbol")
     print("\n")
     print("QUOTE Commands:")
     print("* MarketDataRequest: *MDReqID *SubscriptionRequestType *MarketDepth *NoMDEntryTypes *MDEntryType *NoRelatedSym *Symbol MDUpdateType")
