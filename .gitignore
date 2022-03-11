@@ -135,3 +135,5 @@ dmypy.json
 /samples/ConsoleSample/config-quote.json
 /samples/KleinWebAppSample/config-trade.json
 /samples/KleinWebAppSample/config-quote.json
+/samples/jupyter/config-trade.json
+/samples/jupyter/config-quote.json

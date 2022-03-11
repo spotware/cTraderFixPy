@@ -1,9 +1,27 @@
 # Jupyter Sample
 
-This is sample that will show you how to use the OpenApiPy Python package on a Jupyter notebook.
+This is sample that will show you how to use the cTraderFix Python package on a Jupyter notebook.
 
-In the notebook we get the daily bars data from cTrader Open API, then we use it to train a sklearn model.
+In the notebook we logon, retrive account securities/symbols, and then we execute a market order.
 
-To use the sample you have to create a copy of "credentials.json" file and rename it to "credentials-dev.json".
+Before running the sample you have to create a config file and fill it with your trading account FIX API credentials.
 
-Then fill the file with your Open API application credentials, access token, and a trading account ID.
+Then replace the config file name on sample main file to your config file name.
+
+Config file sample:
+
+```json
+{
+  "Host": "",
+  "Port": 0,
+  "SSL": false,
+  "Username": "",
+  "Password": "",
+  "BeginString": "FIX.4.4",
+  "SenderCompID": "",
+  "SenderSubID": "QUOTE",
+  "TargetCompID": "cServer",
+  "TargetSubID": "QUOTE",
+  "HeartBeat": "30"
+}
+```
