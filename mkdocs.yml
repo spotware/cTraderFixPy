@@ -1,14 +1,14 @@
 ---
 # Project Information
-site_name: OpenApiPy
+site_name: cTraderFixPy
 site_author: Spotware
 site_url: https://openapinet.readthedocs.io/en/latest/
-site_description: cTrader Open API Python package documentation
+site_description: cTrader FIX API Python package documentation
 
 # Repository information
-repo_name: spotware/openApiPy
-repo_url: https://github.com/spotware/openApiPy
-edit_uri: "https://github.com/spotware/openApiPy/tree/master/docs"
+repo_name: spotware/cTraderFixPy
+repo_url: https://github.com/spotware/cTraderFixPy
+edit_uri: "https://github.com/spotware/cTraderFixPy/tree/master/docs"
 
 copyright: "Copyright &copy; <span id='copyright-year'></span> <a href='https://www.spotware.com/' target='_blank'>Spotware Systems Ltd.</a> cTrader, cAlgo, cBroker, cMirror. All rights reserved."
 
@@ -111,9 +111,11 @@ markdown_extensions:
 # Page tree
 nav:
     - Getting Started: index.md
-    - Authentication: 'authentication.md' 
+    - Config: 'config.md'
     - Client: 'client.md'
-    - Samples: "https://github.com/spotware/OpenApiPy/tree/main/samples"
+    - Sending Messages: 'sending-messages.md'
+    - Receiving Messages: 'receiving-messages.md'
+    - Samples: "https://github.com/spotware/cTraderFixPy/tree/main/samples"
 
 
 
