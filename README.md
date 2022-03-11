@@ -27,11 +27,64 @@ This package uses Twisted and it works asynchronously.
 pip install ctrader-fix
 ```
 
+# Config
+
+Config file sample:
+
+```json
+{
+  "Host": "",
+  "Port": 0,
+  "SSL": false,
+  "Username": "",
+  "Password": "",
+  "BeginString": "FIX.4.4",
+  "SenderCompID": "",
+  "SenderSubID": "QUOTE",
+  "TargetCompID": "cServer",
+  "TargetSubID": "QUOTE",
+  "HeartBeat": "30"
+}
+```
+
 # Usage
 
 ```python
+from twisted.internet import reactor
+from inputimeout import inputimeout, TimeoutOccurred
+import json
+from ctrader_fix import *
 
+# Callback for receiving all messages
+def onMessageReceived(client, responseMessage):
+    print("Received: ", responseMessage.getMessage().replace("", "|"))
+    messageType = responseMessage.getFieldValue(35)
+    if messageType == "A":
+        print("We are logged in")
 
+# Callback for client disconnection
+def disconnected(client, reason): 
+    print("Disconnected, reason: ", reason)
+
+# Callback for client connection
+def connected(client):
+    print("Connected")
+    logonRequest = LogonRequest(config)
+    send(logonRequest)
+
+# you can use two separate config files for QUOTE and TRADE
+with open("config-trade.json") as configFile:
+    config = json.load(configFile)
+
+client = Client(config["Host"], config["Port"], ssl = config["SSL"])
+
+# Setting client callbacks
+client.setConnectedCallback(connected)
+client.setDisconnectedCallback(disconnected)
+client.setMessageReceivedCallback(onMessageReceived)
+# Starting the client service
+client.startService()
+reactor.run()
 ```
 
 Please check documentation or samples for a complete example.
