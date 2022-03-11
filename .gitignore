@@ -133,3 +133,5 @@ dmypy.json
 /samples/jupyter/credentials-dev.json
 /samples/ConsoleSample/config-trade.json
 /samples/ConsoleSample/config-quote.json
+/samples/KleinWebAppSample/config-trade.json
+/samples/KleinWebAppSample/config-quote.json
