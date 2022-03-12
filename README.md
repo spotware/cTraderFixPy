@@ -51,7 +51,6 @@ Config file sample:
 
 ```python
 from twisted.internet import reactor
-from inputimeout import inputimeout, TimeoutOccurred
 import json
 from ctrader_fix import *
 
