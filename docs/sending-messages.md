@@ -11,7 +11,7 @@ To set fields of a message you should use message instance attributes and use ex
 Let's create some messages:
 
 ```python
-# All mesages contructors requires the config to be passes a parameter
+# All request messages contructors requires the config to be passed as a parameter
 logonRequests = LogonRequest(config)
 
 securityListRequest = SecurityListRequest(config)
