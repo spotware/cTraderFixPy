@@ -18,6 +18,7 @@ theme:
     logo: img/logo.png
     include_search_page: false
     search_index_only: true
+    custom_dir: overrides
     language: en
     features:
         - navigation.instant
