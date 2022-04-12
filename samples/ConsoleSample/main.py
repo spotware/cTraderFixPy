@@ -6,7 +6,7 @@ import json
 from ctrader_fix import *
 
 # you can use two separate config files for QUOTE and TRADE
-with open("config-trade.json") as configFile:
+with open("config-quote.json") as configFile:
     config = json.load(configFile)
 
 client = Client(config["Host"], config["Port"], ssl = config["SSL"])
