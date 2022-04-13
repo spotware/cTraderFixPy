@@ -47,6 +47,11 @@ def onMessageReceived(client, responseMessage):
     if responseDeferred is not None:
         responseDeferred.callback(lastReceivedMessage)
     print("Received: ", lastReceivedMessage)
+    if responseMessage.getFieldValue(35) == "1":
+        print("TestRequest received, sending back Heartbeat")
+        heartbeat = Heartbeat(config)
+        heartbeat.TestReqID = responseMessage.getFieldValue(112)
+        send(heartbeat)
     responseDeferred= None
 
 def setParameters(request, **kwargs):

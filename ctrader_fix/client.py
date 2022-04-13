@@ -9,9 +9,8 @@ from ctrader_fix.factory import Factory
 from ctrader_fix.fixProtocol import FixProtocol
 
 class Client(ClientService):
-    def __init__(self, host, port, ssl=False, delimiter = "", retryPolicy=None, clock=None, prepareConnection=None, numberOfMessagesToSendPerSecond=5):
+    def __init__(self, host, port, ssl=False, delimiter = "", retryPolicy=None, clock=None, prepareConnection=None):
         self._runningReactor = reactor
-        self.numberOfMessagesToSendPerSecond = numberOfMessagesToSendPerSecond
         self.delimiter = delimiter
         endpoint = clientFromString(self._runningReactor, f"ssl:{host}:{port}" if ssl else f"tcp:{host}:{port}")
         self._factory = Factory.forProtocol(FixProtocol, client=self)

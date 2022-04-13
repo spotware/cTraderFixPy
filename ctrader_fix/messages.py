@@ -85,16 +85,16 @@ class Heartbeat(RequestMessage):
         super().__init__("0", config)
 
     def _getBody(self):
-        if hasattr(self, "TestReqId") is False:
+        if hasattr(self, "TestReqID") is False:
             return None
-        return f"112={self.TestReqId}"
+        return f"112={self.TestReqID}"
 
 class TestRequest(RequestMessage):
     def __init__(self, config):
         super().__init__("1", config)
 
     def _getBody(self):
-        return f"112={self.TestReqId}"
+        return f"112={self.TestReqID}"
 
 class LogoutRequest(RequestMessage):
     def __init__(self, config):
