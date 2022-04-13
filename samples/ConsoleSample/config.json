@@ -9,5 +9,5 @@
   "SenderSubID": "QUOTE",
   "TargetCompID": "cServer",
   "TargetSubID": "QUOTE",
-  "HeartBeat": "30"
+  "HeartBeat": "40"
 }

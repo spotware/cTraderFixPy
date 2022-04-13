@@ -74,12 +74,19 @@ commands = {
     "OrderCancelRequest": OrderCancelRequest,
     "OrderCancelReplaceRequest": OrderCancelReplaceRequest}
 
+testReqId = 0
+
 def executeUserCommand():
     try:
         print("\n")
-        userInput = inputimeout("Command (ex: Help): ", timeout=30)
+        userInput = inputimeout("Command (ex: Help): ", timeout=int(config["HeartBeat"]))
     except TimeoutOccurred:
-        print("Command Input Timeout")
+        print("Timeout, sending TestRequest (Connection will be dropped if you are not logged in yet)")
+        testRequest = TestRequest(config)
+        global testReqId
+        testReqId += 1
+        testRequest.TestReqID = testReqId
+        send(testRequest)
         reactor.callLater(3, callable=executeUserCommand)
         return
     if userInput.lower() == "help":
@@ -101,12 +108,19 @@ def executeUserCommand():
         request = commands[command](config)
         setParameters(request, **parameters)
         send(request)
+        print("If response message not arrived keep pressing 'Enter'")
     else:
-        print("Invalid Command: ", userInput)
+        if userInput != "":
+            print("Invalid Command: ", userInput)
         reactor.callLater(3, callable=executeUserCommand)
 
 def onMessageReceived(client, responseMessage): # Callback for receiving all messages
     print("\nReceived: ", responseMessage.getMessage().replace("", "|"))
+    if responseMessage.getFieldValue(35) == "1":
+        print("TestRequest received, sending back Heartbeat")
+        heartbeat = Heartbeat(config)
+        heartbeat.TestReqID = responseMessage.getFieldValue(112)
+        send(heartbeat)
     reactor.callLater(3, callable=executeUserCommand)
 
 def disconnected(client, reason): # Callback for client disconnection

@@ -8,7 +8,6 @@ class Factory(ClientFactory):
         super().__init__()
         self.client = kwargs['client']
         self.delimiter = self.client.delimiter
-        self.numberOfMessagesToSendPerSecond = self.client.numberOfMessagesToSendPerSecond
     def connected(self):
         self.client._connected()
     def disconnected(self, reason):
