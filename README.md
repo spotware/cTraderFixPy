@@ -69,7 +69,7 @@ def disconnected(client, reason):
 def connected(client):
     print("Connected")
     logonRequest = LogonRequest(config)
-    send(logonRequest)
+    client.send(logonRequest)
 
 # you can use two separate config files for QUOTE and TRADE
 with open("config-trade.json") as configFile:
